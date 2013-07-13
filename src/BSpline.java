@@ -52,6 +52,9 @@ public class BSpline extends Curve
 
 	//The global percent increase in error we allow to simplify the fitted curve. 
 	public static final double GLOBAL_THRESHOLD = 0.5;
+	public static final double PER_PIECE_THRESHOLD = 0.000006;
+	public static final double PER_SPLINE_THRESHOLD = 0.000005;
+	public static final double MAXIMUM_POINT_ERROR = 0.0005;
 
 	private int [] oldFootpoints;
 	private Point2D [] dataPointsCopy;
@@ -495,8 +498,8 @@ public class BSpline extends Curve
 			error = fittingIteration(dataPoints, weights, t);
 
 			//Repeat until the error has increased by more than a certain scalar multiple of the minimum error
-			//observed so far, or if it cannot be reduced further.
-		} while(error < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && wasReduced);
+			//observed so far, or if it cannot be reduced further. We also enforce per curve and global error minima.
+		} while(error < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && error < PER_SPLINE_THRESHOLD && wasReduced);
 
 		//Reverts the control points to the previous optimal result.
 		if(wasReduced)
@@ -530,8 +533,9 @@ public class BSpline extends Curve
 			}
 			
 			//If the minimum error from any of the removed ctrl points still satisfies our thresholds, we remove it
-			if (minimumErrorIndex != -1 && minimumError < minimumGlobalError*(1 + GLOBAL_THRESHOLD)){
+			if (minimumErrorIndex != -1 && minimumError < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && minimumError < PER_SPLINE_THRESHOLD){
 				reduceCurve (minimumErrorIndex, t);
+				error = fittingIteration(dataPoints, weights, t);
 				changed = true;
 			}
 		} while (changed);

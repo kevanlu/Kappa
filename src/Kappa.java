@@ -44,11 +44,8 @@ public class Kappa extends JFrame
 	static final boolean DEBUG_MODE = false;
 
 	//Whether we allow for control point adjustment or not
-	//TODO change to a final once testing is done.
-	static final boolean ENABLE_CTRL_PT_ADJUSTMENT = false;
-
-	//The number of repetitions of our fitting algorithm
-	static final int NO_REPEATS = 5;
+	public static final boolean DEFAULT_CTRL_PT_ADJUSTMENT = true;
+	static boolean enableCtrlPtAdjustment = DEFAULT_CTRL_PT_ADJUSTMENT;
 
 	//Application Constants
 	public static final String APPLICATION_NAME = "Kappa";
@@ -141,29 +138,26 @@ public class Kappa extends JFrame
 				//we want to 'de-shift' it when we fit the curve
 				c.deshiftControlPoints(ControlPanel.currentLayerSlider.getValue());
 
-				//I've found that iterating this minimization procedure yields better results generally.
-				//Hence I've done this in this case.
-				for (int noRepeats = 0; noRepeats < NO_REPEATS; noRepeats++){
-					//If the b-spline is closed, we convert it to an open curve for fitting.
-					//Converts it to an open B-Spline for fitting if it was originally a closed spline
-					boolean wasOpen = ((BSpline)c).isOpen();
-					if(!((BSpline)c).isOpen()) ((BSpline)c).convertToOpen(ControlPanel.currentLayerSlider.getValue());
-					do{
-						oldError = error;
+				//If the b-spline is closed, we convert it to an open curve for fitting.
+				//Converts it to an open B-Spline for fitting if it was originally a closed spline
+				boolean wasOpen = ((BSpline)c).isOpen();
+				if(!((BSpline)c).isOpen()) ((BSpline)c).convertToOpen(ControlPanel.currentLayerSlider.getValue());
+				do{
+					oldError = error;
 
-						//Checks to make sure that some data points are there
-						dataPoints = c.getThresholdedPixels();
+					//Checks to make sure that some data points are there
+					dataPoints = c.getThresholdedPixels();
 
-						weights = getWeights (dataPoints);
-						error = ((BSpline)c).fittingIteration(dataPoints, weights, ControlPanel.currentLayerSlider.getValue());
-					}while(oldError > error);
-					error=oldError;
+					weights = getWeights (dataPoints);
+					error = ((BSpline)c).fittingIteration(dataPoints, weights, ControlPanel.currentLayerSlider.getValue());
+				}while(oldError > error);
+				error=oldError;
 
-					//Once the fitting has been done, we remove unnecessary control points.
-					if (ENABLE_CTRL_PT_ADJUSTMENT)
-						((BSpline)c).adjustControlPoints (dataPoints, weights, error, ControlPanel.currentLayerSlider.getValue());
-					if(!wasOpen) ((BSpline)c).convertToClosed(ControlPanel.currentLayerSlider.getValue());
-				}
+				//Once the fitting has been done, we remove unnecessary control points.
+				if (enableCtrlPtAdjustment)
+					((BSpline)c).adjustControlPoints (dataPoints, weights, error, ControlPanel.currentLayerSlider.getValue());
+				if(!wasOpen) ((BSpline)c).convertToClosed(ControlPanel.currentLayerSlider.getValue());
+
 				//Sets the x and y coordinate to (x+1, y+1), because the image is zero-indexed in java, so there's a 1 pixel offset
 				c.shiftControlPoints(ControlPanel.currentLayerSlider.getValue());
 
@@ -962,7 +956,7 @@ public class Kappa extends JFrame
 			//Set the Micron Pixel Factor
 			Curve.setMicronPixelFactor (nmPerPixel/1000.0);
 			System.out.println("Micron Pixel Factor: " + nmPerPixel/1000.0);
-			
+
 			//Set the Threshold Radius Depending on how big the pixel size is.
 			//We always set it to the equivalent of 2 micrometres.
 			InfoPanel.thresholdRadiusSpinner.setValue((int)(2/Curve.getMicronPixelFactor()));
@@ -971,7 +965,7 @@ public class Kappa extends JFrame
 			//Amplitude and Stretch Factor for the sine curves.
 			a = 6000/(Curve.getMicronPixelFactor()*1000.0);
 			b = (2*Math.PI)/currImage.getWidth();
-			
+
 			//Scale the testing curves so that they span the entire image.
 			//The testing curves were originally drawn on a 82px x 82px image, so that's the reference for our scaling.
 			MenuBar.loadFile (new File ("test-curves/newtestcurves.kapp"));

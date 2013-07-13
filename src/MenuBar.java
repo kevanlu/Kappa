@@ -162,7 +162,16 @@ public class MenuBar extends JMenuBar {
 				catch(IOException e){System.out.println("ah");}
 			}});
 		runTestScript.setAccelerator (KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+		toolMenu.addSeparator();
 		toolMenu.add(runTestScript);
+		
+		JCheckBoxMenuItem toggleCtrlPtAdjustment = new JCheckBoxMenuItem ("Enable Control Point Adjustment");
+		toggleCtrlPtAdjustment.setState(Kappa.enableCtrlPtAdjustment);
+		toggleCtrlPtAdjustment.addActionListener(new ActionListener(){public void actionPerformed (ActionEvent e){
+			Kappa.enableCtrlPtAdjustment = !Kappa.enableCtrlPtAdjustment;
+		;}});
+		toggleCtrlPtAdjustment.setEnabled(true);
+		toolMenu.add(toggleCtrlPtAdjustment);
 
 		this.add(toolMenu);
 
