@@ -52,9 +52,8 @@ public class BSpline extends Curve
 
 	//The global percent increase in error we allow to simplify the fitted curve. 
 	public static final double GLOBAL_THRESHOLD = 0.5;
-	public static final double PER_PIECE_THRESHOLD = 0.000006;
-	public static final double PER_SPLINE_THRESHOLD = 0.000005;
-	public static final double MAXIMUM_POINT_ERROR = 0.0005;
+	public static final double PER_PIECE_THRESHOLD = 0.6;
+	public static final double PER_SPLINE_THRESHOLD = 0.003;
 
 	private int [] oldFootpoints;
 	private Point2D [] dataPointsCopy;
@@ -499,7 +498,8 @@ public class BSpline extends Curve
 
 			//Repeat until the error has increased by more than a certain scalar multiple of the minimum error
 			//observed so far, or if it cannot be reduced further. We also enforce per curve and global error minima.
-		} while(error < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && error < PER_SPLINE_THRESHOLD && wasReduced);
+		} while(error < minimumGlobalError*(1 + GLOBAL_THRESHOLD) 
+				&& error < PER_SPLINE_THRESHOLD && wasReduced && maintainsSplineThresholds(dataPoints, weights));
 
 		//Reverts the control points to the previous optimal result.
 		if(wasReduced)
@@ -533,7 +533,10 @@ public class BSpline extends Curve
 			}
 			
 			//If the minimum error from any of the removed ctrl points still satisfies our thresholds, we remove it
-			if (minimumErrorIndex != -1 && minimumError < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && minimumError < PER_SPLINE_THRESHOLD){
+			if (minimumErrorIndex != -1 
+					&& minimumError < minimumGlobalError*(1 + GLOBAL_THRESHOLD) 
+					&& minimumError < PER_SPLINE_THRESHOLD
+					&& maintainsSplineThresholds(dataPoints, weights)){
 				reduceCurve (minimumErrorIndex, t);
 				error = fittingIteration(dataPoints, weights, t);
 				changed = true;
@@ -598,7 +601,7 @@ public class BSpline extends Curve
 	}
 
 	public double evaluateError (ArrayList<Point2D> dataPoints, ArrayList<Double> weights){
-		//Evaluates the error after fitting, weighted by intensity.
+		//Evaluates the total error after fitting, weighted by intensity.
 		double error = 0;
 		for (int i = 0; i < this.getNoPoints(); i ++){
 			double minDistance = Double.MAX_VALUE;
@@ -610,7 +613,35 @@ public class BSpline extends Curve
 			}
 			error += minDistance;
 		}
-		return error/(this.getNoPoints()*1.0);
+		return error;
+	}
+	
+	//TODO Doublecheck
+	public boolean maintainsSplineThresholds(ArrayList<Point2D> dataPoints, ArrayList<Double> weights){
+		return true;
+//		//Ensures that the error per spline piece remains below a specified threshold
+//		double pieceError;
+//		for (int n = 0; n < noCurves; n ++){
+//			
+//			//Computes the total error for a piece of the spline
+//			pieceError = 0;
+//			for (int i = n*BezierCurve.NO_CURVE_POINTS; i < (n+1)*BezierCurve.NO_CURVE_POINTS; i++){
+//				double minDistance = Double.MAX_VALUE;
+//				for (int j = 0; j < dataPoints.size(); j++){
+//					double dist = (1/(weights.get(j)*1.0)) * Math.sqrt(squared(this.getSpecificPoint(i).getX() - dataPoints.get(j).getX()) 
+//							+ squared(this.getSpecificPoint(i).getY() - dataPoints.get(j).getY()));
+//					if (dist < minDistance)
+//						minDistance = dist;
+//				}
+//				pieceError += minDistance;
+//			}
+//			
+//			//If the error at the piece exceeds our threshold, we return false.
+//			if ((pieceError / BezierCurve.NO_CURVE_POINTS) > PER_SPLINE_THRESHOLD)
+//				return false;
+//		}
+//		//If all spline thresholds are satisfied, we return true.
+//		return true;
 	}
 
 	private double [] evaluateBasisFunction(int footpointIndex)
