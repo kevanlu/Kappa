@@ -51,7 +51,8 @@ public class BSpline extends Curve
 	public static final double SMOOTHNESS_FACTOR = 10;
 
 	//The global percent increase in error we allow to simplify the fitted curve. 
-	public static final double GLOBAL_THRESHOLD = 0.5;
+	public static final double GLOBAL_THRESHOLD = 0.05;
+	public static final double LOCAL_THRESHOLD = 0.02;
 
 	private int [] oldFootpoints;
 	private Point2D [] dataPointsCopy;
@@ -60,6 +61,7 @@ public class BSpline extends Curve
 		super(bsplineCtrlPts, t, noCtrlPts, name, dataRadius);
 		this.isOpen = open;
 		minimumGlobalError = Double.MAX_VALUE;
+		minimumLocalError = Double.MAX_VALUE;
 
 		//We generate the knot vector and the corresponding polar values for each of the control points
 		//See Sederberg's text on Computer Aided Graphic Design.
@@ -335,8 +337,14 @@ public class BSpline extends Curve
 		//If we have no datapoints, then there's no point of fitting the curve, hence we just return.
 		if (dataPoints.size() == 0) return 0.0;
 
-		double oldError = evaluateError(dataPoints, weights);
+		//If, after fitting, error across the entire spline is the smallest we've seen yet, we record it.
+		double oldError = evaluateGlobalError(dataPoints, weights);
 		if (oldError/this.getNoPoints() < minimumGlobalError) minimumGlobalError = oldError/this.getNoPoints();
+
+		//We also record the smallest observed maximum-local-error. 
+		//That is, the curve where the piece with maximum error is the smallest.
+		double oldLocalError = evaluateMaxLocalError(dataPoints, weights);
+		if (oldLocalError/BezierCurve.NO_CURVE_POINTS < minimumLocalError) minimumLocalError = oldLocalError/BezierCurve.NO_CURVE_POINTS;
 
 		//Copies the old control points in case the iteration provides poor results and we want to revert.
 		ArrayList<Point2D> oldCtrlPts = new ArrayList<Point2D>(ctrlPts.size());
@@ -441,26 +449,30 @@ public class BSpline extends Curve
 		if(Kappa.DEBUG_MODE)
 			for(Point2D p : newCtrlPts) System.out.println(p);
 
-		double error = evaluateError(dataPoints, weights);
-		if (error/this.getNoPoints() < minimumGlobalError) minimumGlobalError = error/this.getNoPoints();
-		
-		//If the error increased from the previous iteration, we restore the previous curve
-		if (error >= oldError){
+		//Computes the new global and local errors after the curve has been fit
+		double newError = evaluateGlobalError(dataPoints, weights);
+		if (newError/this.getNoPoints() < minimumGlobalError) minimumGlobalError = newError/this.getNoPoints();
+		double newLocalError = evaluateMaxLocalError(dataPoints, weights);
+		if (newLocalError/BezierCurve.NO_CURVE_POINTS < minimumLocalError) minimumLocalError = newLocalError/BezierCurve.NO_CURVE_POINTS;
+
+		//If the global error increased from the previous iteration, we restore the previous curve
+		if (newError >= oldError){
 			this.ctrlPts = oldCtrlPts;
 			fillPoints(ctrlPts, t);
 			keyframes.add (new BControlPoints (this.ctrlPts, t));
 			return oldError/this.getNoPoints();
 		}
 		keyframes.add (new BControlPoints (this.ctrlPts, t));
-		return error/this.getNoPoints();
+		return newError/this.getNoPoints();
 	}
 
 	//Adjust the control point number to improve the fit 
-	public void adjustControlPoints (ArrayList<Point2D> dataPoints, ArrayList<Double> weights, double error, int t){
+	public void adjustControlPoints (ArrayList<Point2D> dataPoints, ArrayList<Double> weights, int t){
 
 		//If we have no datapoints, then there's no point of adjusting the curve, hence we just return.
 		if (dataPoints.size() == 0) return;
 
+		double globalError, localError;
 		int maxRedundancyIndex;
 		boolean wasReduced;
 		ArrayList<Point2D> oldCtrlPts;
@@ -490,51 +502,63 @@ public class BSpline extends Curve
 
 			//Replaces this control point, and the one after it, with an average of the two.
 			wasReduced = reduceCurve(maxRedundancyIndex, t);
-			error = fittingIteration(dataPoints, weights, t);
-			System.out.println(error);
+			globalError = fittingIteration(dataPoints, weights, t);
+			localError = evaluateMaxLocalError(dataPoints, weights)/BezierCurve.NO_CURVE_POINTS;
 
 			//Repeat until the error has increased by more than a certain scalar multiple of the minimum error
 			//observed so far, or if it cannot be reduced further.
-		} while(error < minimumGlobalError*(1 + GLOBAL_THRESHOLD) && wasReduced);
+		} while(globalError < minimumGlobalError*(1 + GLOBAL_THRESHOLD) 
+				&& localError < minimumLocalError *(1 + LOCAL_THRESHOLD)
+				&& wasReduced);
 
 		//Reverts the control points to the previous optimal result.
 		if(wasReduced)
 			augmentCurve(t, oldCtrlPts);
-		
+
 		//Now we do secondary control point removal, in a naive fashion. We try removing each internal control point
-		//and see which one results in the smallest error, and if it still satisfies our thresholds.
+		//and see which one produces the best fit. For this one, we see if it still satisfies our thresholds.
+		//We only consider local errors at this point.
 		boolean changed;
 		do {
 			changed = false;
-			
-			//We attempt to remove every internal control point and see which one has smallest error
+
+			//We attempt to remove every internal control point and see which one has smallest max local error
 			double minimumError = Double.MAX_VALUE;
 			int minimumErrorIndex = -1;
-			
+			double reducedError;
 			for (int i = 1; i < this.getNoCtrlPts() - 1; i ++){
 				//Copies the old control points
 				oldCtrlPts = new ArrayList<Point2D>(ctrlPts.size());
 				for (Point2D p : ctrlPts)
 					oldCtrlPts.add(p);
-				
+
 				//If the curve can't be reduced at any point, it means that the # of control points is insufficient.
 				if (!reduceCurve (i, t)) break;
-				error = fittingIteration(dataPoints, weights, t);
-				if (error < minimumError){
-					minimumError = error;
+
+				//We compute the error of the reduced curve and see if it's increased
+				fittingIteration(dataPoints, weights, t);
+				reducedError = evaluateMaxLocalError(dataPoints, weights)/BezierCurve.NO_CURVE_POINTS;
+
+				if (reducedError < minimumError){
+					minimumError = reducedError;
 					minimumErrorIndex = i;
 				}
 				//Restore the curve so we can try the next control point.
 				augmentCurve(t, oldCtrlPts);
 			}
-			
+
 			//If the minimum error from any of the removed ctrl points still satisfies our thresholds, we remove it
-			if (minimumErrorIndex != -1 && minimumError < minimumGlobalError*(1 + GLOBAL_THRESHOLD) ){
+			if (minimumErrorIndex != -1 && minimumError < minimumLocalError*(1 + LOCAL_THRESHOLD)){
 				reduceCurve (minimumErrorIndex, t);
-				error = fittingIteration(dataPoints, weights, t);
+				globalError = fittingIteration(dataPoints, weights, t);
+				localError = evaluateMaxLocalError(dataPoints, weights)/BezierCurve.NO_CURVE_POINTS;
 				changed = true;
 			}
 		} while (changed);
+
+		//Set the new minimum global and local errors to that of the new reduced curve
+		minimumGlobalError = globalError;
+		minimumLocalError = localError;
 	}
 
 	private double getLocalCtrlPtDensity(int i){
@@ -549,7 +573,7 @@ public class BSpline extends Curve
 		//Estimates the local density by looking at the squared distances between the current control point and its two neighbours
 		double dij = Math.sqrt(squared(pi.getX() - pj.getX()) + squared(pi.getY() - pj.getY()));
 		double dik = Math.sqrt(squared(pi.getX() - pk.getX()) + squared(pi.getY() - pk.getY()));
-		
+
 		//Returns the density as 1 over the distance to the nearest neighbour 
 		if (dij < dik)
 			return 1.0/(dij); 
@@ -593,7 +617,9 @@ public class BSpline extends Curve
 		keyframes.add (new BControlPoints (this.ctrlPts, t));
 	}
 
-	public double evaluateError (ArrayList<Point2D> dataPoints, ArrayList<Double> weights){
+	//TODO This and the local error evaluation do the same computation. 
+	//Convert the two methods into one that returns an array with both values.
+	public double evaluateGlobalError (ArrayList<Point2D> dataPoints, ArrayList<Double> weights){
 		//Evaluates the total error after fitting, weighted by intensity.
 		double error = 0;
 		for (int i = 0; i < this.getNoPoints(); i ++){
@@ -607,6 +633,34 @@ public class BSpline extends Curve
 			error += minDistance;
 		}
 		return error;
+	}
+
+	public double evaluateMaxLocalError (ArrayList<Point2D> dataPoints, ArrayList<Double> weights){
+		double maxLocalError = 0;
+		double pieceError;
+
+		//Goes through each curve, and finds the average piece error
+		for (int n = 0; n < noCurves; n ++){
+			pieceError = 0;
+			
+			//Computes the error for a single piece of the curve
+			for (int i = n*BezierCurve.NO_CURVE_POINTS; i < (n+1)*BezierCurve.NO_CURVE_POINTS; i ++){
+				double minDistance = Double.MAX_VALUE;
+				for (int j = 0; j < dataPoints.size(); j++){
+					double dist = (1/(weights.get(j)*1.0)) * Math.sqrt(squared(this.getSpecificPoint(i).getX() - dataPoints.get(j).getX()) 
+							+ squared(this.getSpecificPoint(i).getY() - dataPoints.get(j).getY()));
+					if (dist < minDistance)
+						minDistance = dist;
+				}
+				pieceError += minDistance;
+			}
+			
+			//If this error is the largest we've seen so far, we record it.
+			if (pieceError > maxLocalError)
+				maxLocalError = pieceError;
+		}
+		
+		return maxLocalError;
 	}
 
 	private double [] evaluateBasisFunction(int footpointIndex)
@@ -988,7 +1042,7 @@ public class BSpline extends Curve
 		thresholdedPixels.addAll(uniquePixels);
 		return thresholdedPixels;
 	}
-	
+
 	public double getMaximum (double start, double end){
 		double max = Double.MIN_VALUE;
 		double pieceMax;

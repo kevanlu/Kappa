@@ -42,8 +42,11 @@ public abstract class Curve {
 	public static final int THRESHOLD_RADIUS = 5;
 	public static final int CTRL_PT_TOL = 4;
 	
-	//We keep track of the minimum error ever observed, as a threshold value when we adjust control points.
+	//We keep track of the minimum global and local error ever observed, as a threshold value when we adjust control points.
+	//Global = across the entire curve
+	//Local = across the spline only.
 	protected double minimumGlobalError;
+	protected double minimumLocalError;
 
 	//Drawing constants
 	public static final int SELECTED_CTRL_PT_SIZE = 2;
@@ -222,8 +225,9 @@ public abstract class Curve {
 		fillPoints(ctrlPts, t);
 		boundingBox = keyframes.getBounds(t);
 		
-		//Resets the minimum global error if a control point has been moved
+		//Resets the minimum errors if a control point has been moved
 		minimumGlobalError = Double.MAX_VALUE;
+		minimumLocalError = Double.MAX_VALUE;
 	}
 	public void addKeyframe (ArrayList<Point2D> newCtrlPts, int t) {keyframes.add(new BControlPoints (ctrlPts, t));}
 	

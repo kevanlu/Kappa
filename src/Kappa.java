@@ -155,7 +155,7 @@ public class Kappa extends JFrame
 
 				//Once the fitting has been done, we remove unnecessary control points.
 				if (enableCtrlPtAdjustment)
-					((BSpline)c).adjustControlPoints (dataPoints, weights, error, ControlPanel.currentLayerSlider.getValue());
+					((BSpline)c).adjustControlPoints (dataPoints, weights, ControlPanel.currentLayerSlider.getValue());
 				if(!wasOpen) ((BSpline)c).convertToClosed(ControlPanel.currentLayerSlider.getValue());
 
 				//Sets the x and y coordinate to (x+1, y+1), because the image is zero-indexed in java, so there's a 1 pixel offset
