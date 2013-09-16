@@ -44,7 +44,7 @@ public class Kappa extends JFrame
 	static final boolean DEBUG_MODE = false;
 
 	//Whether we allow for control point adjustment or not
-	public static final boolean DEFAULT_CTRL_PT_ADJUSTMENT = true;
+	public static final boolean DEFAULT_CTRL_PT_ADJUSTMENT = false;
 	static boolean enableCtrlPtAdjustment = DEFAULT_CTRL_PT_ADJUSTMENT;
 
 	//Application Constants

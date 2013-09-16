@@ -51,8 +51,8 @@ public class BSpline extends Curve
 	public static final double SMOOTHNESS_FACTOR = 10;
 
 	//The global percent increase in error we allow to simplify the fitted curve. 
-	public static final double GLOBAL_THRESHOLD = 0.05;
-	public static final double LOCAL_THRESHOLD = 0.02;
+	public static final double GLOBAL_THRESHOLD = 0.04;
+	public static final double LOCAL_THRESHOLD = 0.05;
 
 	private int [] oldFootpoints;
 	private Point2D [] dataPointsCopy;
@@ -76,12 +76,12 @@ public class BSpline extends Curve
 
 	public void computeSpline(ArrayList<Point2D> bsplineCtrlPts, int t){
 		int n = B_SPLINE_DEGREE;
+		knotVector = new double [2*n + noCurves - 1];
 
 		//Generates different knot vectors depending on whether the B-Spline is open or closed.
 		if (isOpen){
 			//An open b-spline where the ends match the first and last endpoint have n-fold knots at the ends
 			//Consequently, the knot vector will have 2n + m - 1 elements. 
-			knotVector = new double [2*n + noCurves - 1];
 			for (int start = 0; start < n ; start ++)
 				knotVector[start] = 0;
 			for (int middle = n; middle < knotVector.length - n; middle ++)
@@ -97,7 +97,6 @@ public class BSpline extends Curve
 		else {
 			//A closed (periodic) b-spline requires that the first n control points are identical to the last n
 			//And the first n intervals are also the same as the last n.
-			knotVector = new double [2*n + noCurves - 1];
 			for (int i = 0; i < knotVector.length; i ++)
 				knotVector[i] = i;
 

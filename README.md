@@ -6,16 +6,14 @@ Kappa is a Curvature Analysis Program developed in Java, aimed towards measuring
 Installation Instructions
 -------------------------
 
-
 Getting Started
 ---------------
 View our User Manual for detailed instructions on how to use Kappa.
+https://dl.dropboxusercontent.com/u/157117/Kappa%20User%20Manual.pdf
 
 Compiling the Source Code
 -------------------------
-Kappa was 
 ### Importing the Project into Eclipse with eGit
-
 ### Compiling without Eclipse
 
 Referenced Libraries
