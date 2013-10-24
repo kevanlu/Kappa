@@ -31,7 +31,7 @@ eGit allows you to work with Git repositories within the Eclipse IDE. To add Kap
 6. Press next, choose the master branch, and choose the local destination for the project.
 
 ### Compiling Kappa without Eclipse
-If you do not want to use Eclipse or eGit to work on the project, you can compile Kappa from the command line. A compile script is provided in the main directory of the program folder. It requires the build tool Apache Ant to be installed. If Ant is present, then compiling the project is straightforward.
+If you do not want to use Eclipse or eGit to work on the project, you can compile Kappa from the command line. A compile script is provided in the main directory of the program folder. It requires the build tool **Apache Ant** to be installed. If Ant is present, then compiling the project is straightforward.
 
 #### In Mac OS X or Linux
 After extracting the downloaded archive, open a Terminal/Shell window, and navigate to the folder. Run compile.sh with the following command:
@@ -41,7 +41,6 @@ After extracting the downloaded archive, open a Terminal/Shell window, and navig
 Note that in **OS X Mavericks**, ant is not installed by default. It can be installed using Homebrew with the following commands:
 
 	ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
-
 	brew install https://raw.github.com/Homebrew/homebrew-dupes/master/ant.rb
 
 #### In Windows
