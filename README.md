@@ -35,10 +35,11 @@ If you do not want to use Eclipse or eGit to work on the project, you can compil
 
 #### In Mac OS X or Linux
 After extracting the downloaded archive, open a Terminal/Shell window, and navigate to the folder. Run compile.sh with the following command:
+
 	./compile.sh Kappa
 
 #### In Windows
-Windows cannot natively run the compile script, but can do so with **Cygwin** installed (www.cygwin.com). Once Cygwin is installed, you can open a Cygwin terminal window, and follow the same steps as with a Mac OS X/ Linux installation.
+Windows cannot natively run the compile script, but can do so with **Cygwin** installed (www.cygwin.com). Once Cygwin is installed, you can open a Cygwin terminal window, and follow the same steps as with a Mac OS X or Linux installation.
 
 Changelog
 ---------
