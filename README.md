@@ -38,9 +38,10 @@ After extracting the downloaded archive, open a Terminal/Shell window, and navig
 
 	./compile.sh Kappa
 
-Note that in OS X Mavericks, ant is not installed by default. It can be installed using Homebrew with the following commands:
+Note that in **OS X Mavericks**, ant is not installed by default. It can be installed using Homebrew with the following commands:
 
 	ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+
 	brew install https://raw.github.com/Homebrew/homebrew-dupes/master/ant.rb
 
 #### In Windows
