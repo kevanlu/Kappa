@@ -18,7 +18,7 @@ https://dl.dropboxusercontent.com/u/157117/Kappa%20User%20Manual.pdf
 Compiling the Source Code
 -------------------------
 ### Importing the Project into Eclipse with eGit
-eGit allows you to work with Git repositories within the Eclipse IDE.
+eGit allows you to work with Git repositories within the Eclipse IDE. To add Kappa as an Eclipse project using eGit, perform the following steps:
 
 1. Install eGit by following the instructions found here: http://www.eclipse.org/egit/
 2. From the Eclipse Menubar, go to File -> Import
@@ -27,10 +27,18 @@ eGit allows you to work with Git repositories within the Eclipse IDE.
 5. Fill out the fields as follows: 
 	1. The host is 'github.com'
 	2. The repository path is '/kevanlu/Kappa'
-	3. The Protocol is git
+	3. The Protocol is 'git'
 6. Press next, choose the master branch, and choose the local destination for the project.
 
 ### Compiling Kappa without Eclipse
+If you do not want to use Eclipse or eGit to work on the project, you can compile Kappa from the command line. A compile script is provided in the main directory of the program folder. It requires the build tool Apache Ant to be installed. If Ant is present, then compiling the project is straightforward.
+
+#### In Mac OS X or Linux
+After extracting the downloaded archive, open a Terminal/Shell window, and navigate to the folder. Run compile.sh with the following command:
+	./compile.sh Kappa
+
+#### In Windows
+Windows cannot natively run the compile script, but can do so with **Cygwin** installed (www.cygwin.com). Once Cygwin is installed, you can open a Cygwin terminal window, and follow the same steps as with a Mac OS X/ Linux installation.
 
 Changelog
 ---------
