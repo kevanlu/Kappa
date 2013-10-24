@@ -20,15 +20,15 @@ Compiling the Source Code
 ### Importing the Project into Eclipse with eGit
 eGit allows you to work with Git repositories within the Eclipse IDE.
 
-	1. Install eGit by following the instructions found here: http://www.eclipse.org/egit/
-	2. From the Eclipse Menubar, go to File -> Import
-	3. From the list of input sources, choose 'Projects from Git'
-	4. Choose 'URL' as the Repository Source
-	5. Fill out the fields as follows: 
-		1. The host is 'github.com'
-		2. The repository path is '/kevanlu/Kappa'
-		3. The Protocol is git
-	6. Press next, choose the master branch, and choose the local destination for the project.
+1. Install eGit by following the instructions found here: http://www.eclipse.org/egit/
+2. From the Eclipse Menubar, go to File -> Import
+3. From the list of input sources, choose 'Projects from Git'
+4. Choose 'URL' as the Repository Source
+5. Fill out the fields as follows: 
+	1. The host is 'github.com'
+	2. The repository path is '/kevanlu/Kappa'
+	3. The Protocol is git
+6. Press next, choose the master branch, and choose the local destination for the project.
 
 ### Compiling Kappa without Eclipse
 
