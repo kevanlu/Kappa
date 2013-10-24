@@ -38,6 +38,11 @@ After extracting the downloaded archive, open a Terminal/Shell window, and navig
 
 	./compile.sh Kappa
 
+Note that in OS X Mavericks, ant is not installed by default. It can be installed using Homebrew with the following commands:
+
+	ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+	brew install https://raw.github.com/Homebrew/homebrew-dupes/master/ant.rb
+
 #### In Windows
 Windows cannot natively run the compile script, but can do so with **Cygwin** installed (www.cygwin.com). Once Cygwin is installed, you can open a Cygwin terminal window, and follow the same steps as with a Mac OS X or Linux installation.
 
