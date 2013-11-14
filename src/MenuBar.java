@@ -36,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -45,27 +46,27 @@ public class MenuBar extends JMenuBar {
 	private static final long serialVersionUID = 1L;
 
 	public static final int DEFAULT_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-	
+
 	//X axis parameterization for histograms
 	//0 = Parameterized by X-Coordinate
 	//1 = Parameterized by Arc Length
 	//2 = Parameterized by Point Index
 	public static final int DEFAULT_DISTRIBUTION_DISPLAY = 2;
 	protected static int distributionDisplay;
-	
+
 	//File handlers
 	File file;
 	JFileChooser kappaOpen;
 	JFileChooser kappaLoad;
 	JFileChooser kappaSave;
-	
+
 	//Menu Items
 	static JMenuItem [] toolMenuItems = new JMenuItem [ToolPanel.NO_TOOLS];
 	static JMenuItem zoomIn;
 	static JMenuItem zoomOut;
 	static JMenuItem prevFrame, nextFrame, prevKeyframe, nextKeyframe;
 	static JMenuItem adjustBrightnessContrast;
-	
+
 	static JMenuItem delete, enter, fit;
 	static JCheckBoxMenuItem boundingBoxMenu;
 	static JCheckBoxMenuItem scaleCurvesMenu;
@@ -75,11 +76,11 @@ public class MenuBar extends JMenuBar {
 	static JCheckBoxMenuItem bit16;
 	static JCheckBoxMenuItem bit32;
 	static JCheckBoxMenuItem RGBColor;
-	
+
 	/** Creates a menu-bar and adds menu items to it*/
 	@SuppressWarnings("unused")
 	public MenuBar (){
-		
+
 		//Creates a new file chooser. Same native image support as ImageJ since ImageJ libraries are used.
 		kappaOpen = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -153,23 +154,23 @@ public class MenuBar extends JMenuBar {
 		fit.setEnabled(false);
 		fit.setAccelerator (KeyStroke.getKeyStroke(KeyEvent.VK_F, 0));
 		toolMenu.add(fit);
+		toolMenu.addSeparator();
 
 		//TODO remove this later
-		JMenuItem runTestScript = new JMenuItem ("Run Testing Script");
-		runTestScript.addActionListener (new ActionListener(){ 
-			public void actionPerformed (ActionEvent event){
-				try{Kappa.testingScript();}
-				catch(IOException e){System.out.println("ah");}
-			}});
-		runTestScript.setAccelerator (KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-		toolMenu.addSeparator();
-		toolMenu.add(runTestScript);
-		
+		//JMenuItem runTestScript = new JMenuItem ("Run Testing Script");
+		//		runTestScript.addActionListener (new ActionListener(){ 
+		//			public void actionPerformed (ActionEvent event){
+		//				try{Kappa.testingScript();}
+		//				catch(IOException e){System.out.println("Script Error");}
+		//			}});
+		//		runTestScript.setAccelerator (KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+		//		toolMenu.add(runTestScript);
+
 		JCheckBoxMenuItem toggleCtrlPtAdjustment = new JCheckBoxMenuItem ("Enable Control Point Adjustment");
 		toggleCtrlPtAdjustment.setState(Kappa.enableCtrlPtAdjustment);
 		toggleCtrlPtAdjustment.addActionListener(new ActionListener(){public void actionPerformed (ActionEvent e){
 			Kappa.enableCtrlPtAdjustment = !Kappa.enableCtrlPtAdjustment;
-		;}});
+			;}});
 		toggleCtrlPtAdjustment.setEnabled(true);
 		toolMenu.add(toggleCtrlPtAdjustment);
 
@@ -416,18 +417,30 @@ public class MenuBar extends JMenuBar {
 
 		//Adds an "About" option to the menu list
 		JMenuItem aboutMenuItem = new JMenuItem ("About...", 'A');
-		aboutMenuItem.addActionListener (new ActionListener ()
-		{public void actionPerformed (ActionEvent event){
-			JOptionPane.showMessageDialog (Kappa.frame,
-					"Developed by Kevan Lu, \u00a9 2013\n2011-2013 Brouhard Lab, Doublecortin Project", 
-					Kappa.APPLICATION_NAME,
-					JOptionPane.INFORMATION_MESSAGE);}});
+		aboutMenuItem.addActionListener (new ActionListener (){
+			public void actionPerformed (ActionEvent event){
+				JOptionPane.showMessageDialog (Kappa.frame,
+						"Developed by Kevan Lu, \u00a9 2013\n2011-2013 Brouhard Lab, Doublecortin Project", 
+						Kappa.APPLICATION_NAME,
+						JOptionPane.INFORMATION_MESSAGE);}});
+
+		//Adds a link to the User Manual
+		JMenuItem userManualLink = new JMenuItem ("User Manual");
+		userManualLink.addActionListener (new ActionListener (){
+			public void actionPerformed (ActionEvent event){
+				try{
+					if(Desktop.isDesktopSupported())
+						Desktop.getDesktop().browse(new URI("https://dl.dropboxusercontent.com/u/157117/Kappa%20User%20Manual.pdf"));
+				}
+				catch (Exception e){System.out.println ("Incorrect URL Syntax");};
+			}});
 
 		//Adds all newly created menu items to the "Help" list
+		helpMenu.add (userManualLink);
 		helpMenu.add (aboutMenuItem);
 		this.add (helpMenu);
 	}
-	
+
 	static void openFile (File file){
 		//Opens the file using ImageJ libraries.
 		Kappa.imageStack = new ImagePlus(file.getPath());
@@ -604,7 +617,7 @@ public class MenuBar extends JMenuBar {
 			else;
 		}
 	}
-	
+
 	private class LoadActionListener implements ActionListener{
 		public void actionPerformed (ActionEvent e){
 			//Handle open button action.

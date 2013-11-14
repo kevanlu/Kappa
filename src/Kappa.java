@@ -268,7 +268,7 @@ public class Kappa extends JFrame
 	protected static void setDisplayedChannels (int displayRange){
 		RGBStackMerge merge = new RGBStackMerge();
 		//The currImage variable must be set before the histogram visibility is changed,
-		//otherwise the histrograms may not update the image intensities in a newly displayed channel
+		//otherwise the histograms may not update the image intensities in a newly displayed channel
 		switch (displayRange){
 		case 0: 
 			displayedImageStack = new ImagePlus(imageStack.getTitle(), merge.mergeStacks

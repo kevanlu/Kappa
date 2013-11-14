@@ -6,7 +6,7 @@ Kappa is a Curvature Analysis Program developed in Java, aimed towards measuring
 Installation Instructions
 -------------------------
 You can download the latest version of Kappa from the following URL:
-https://dl.dropboxusercontent.com/u/157117/Kappa%201.0.zip
+https://dl.dropboxusercontent.com/u/157117/Kappa%201.01.zip
 
 To run Kappa, unzip the application folder and run the executable.
 
@@ -48,6 +48,7 @@ Windows cannot natively run the compile script, but can do so with **Cygwin** in
 
 Changelog
 ---------
+- **Version 1.01** : Removed Debugging Interface elements and added a link to the user manual from the help dropdown.
 - **Version 1.00** : First release.
 
 Referenced Libraries
