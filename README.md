@@ -48,7 +48,7 @@ Windows cannot natively run the compile script, but can do so with **Cygwin** in
 
 Changelog
 ---------
-- **Version 1.01** : Removed Debugging Interface elements and added a link to the user manual from the help dropdown.
+- **Version 1.01** : Removed Debugging Interface elements. Added a link to the user manual to the help dropdown.
 - **Version 1.00** : First release.
 
 Referenced Libraries
