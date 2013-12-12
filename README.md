@@ -3,6 +3,8 @@ Kappa
 
 Kappa is a Curvature Analysis Program developed in Java, aimed towards measuring the curvature in biological images. It allows a user to trace an initial shape with a B-Spline curve, and then fit that curve to image data with a minimization algorithm. Kappa was written with the Swing widget toolkit, and has been tested thoroughly on Windows, Mac OS X, and Linux.
 
+<img src="https://dl.dropboxusercontent.com/u/157117/Kappa_screen.png" style="width:100%"></img>
+
 Installation Instructions
 -------------------------
 You can download the latest version of Kappa from the following URL:
